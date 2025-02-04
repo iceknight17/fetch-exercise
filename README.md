@@ -2,7 +2,17 @@
 
 This Exercise was built with React, TypeScript, Vite, and Tailwind CSS.
 
-## How to run this project.
+## 🚀 Live Demo
+https://fetch-exercise-five.vercel.app/
+
+## 📦 Local Installation
+
+- clone the repository
+
+```
+git clone https://github.com/iceknight17/fetch-exercise.git
+cd fetch-exercise
+```
 
 - install packages
 

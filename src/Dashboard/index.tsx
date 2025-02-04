@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
 import { Pagination } from "flowbite-react";
+import Select, { MultiValue } from 'react-select';
 import axios from "axios";
 
 import { Dog } from "../types";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
-const perPage = 25;
 
 const defaultPaginationTheme = {
   "base": "",
@@ -35,12 +34,18 @@ const defaultPaginationTheme = {
   }
 };
 
+interface SelectOption {
+  value: string;
+  label: string;
+}
+
 const Dashboard = () => {
   const [breeds, setBreeds] = useState<string[]>([]);
-  const [filteredBreeds, setFilteredBreeds] = useState<string[]>([]);
+  const [filteredBreeds, setFilteredBreeds] = useState<SelectOption[]>([]);
   const [orderBy, setOrderBy] = useState<"asc" | "desc">("asc");
   const [dogs, setDogs] = useState<Dog[]>([]);
   const [page, setPage] = useState<number>(1);
+  const [perPage, setPerPage] = useState<number>(25);
   const [totalCount, setTotalCount] = useState<number>(0);
 
   useEffect(() => {
@@ -58,14 +63,14 @@ const Dashboard = () => {
 
   useEffect(() => {
     fetchDogs();
-  }, [filteredBreeds, orderBy, page]);
+  }, [filteredBreeds, orderBy, page, perPage]);
 
   const fetchDogs = async () => {
     try {
       const response = await axios.get(`${API_BASE_URL}/dogs/search`, {
         withCredentials: true,
         params: {
-          breeds: filteredBreeds,
+          breeds: filteredBreeds.map(item => item.value),
           size: perPage,
           from: perPage * (page - 1),
           sort: `name:${orderBy}`
@@ -80,9 +85,8 @@ const Dashboard = () => {
     }
   };
 
-  const handleBreedChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedBreeds = Array.from(e.target.selectedOptions, (option) => option.value);
-    setFilteredBreeds(selectedBreeds);
+  const handleBreedChange = (selectedItems: MultiValue<SelectOption>) => {
+    setFilteredBreeds([...selectedItems]);
   };
 
   const handleChangeOrder = () => {
@@ -105,14 +109,28 @@ const Dashboard = () => {
             <div className="flex flex-col items-center p-4 space-y-3 md:flex-row md:space-y-0 md:space-x-4">
               <div className="inline-flex items-center">
                 <label htmlFor="breed" className="mr-3">Breeds:</label>
-                <select
-                  multiple
+                <Select
+                  isMulti
+                  name="breeds"
                   value={filteredBreeds}
+                  closeMenuOnSelect={false}
                   onChange={handleBreedChange}
+                  options={breeds.map((breed) => ({ value: breed, label: breed }))}
+                  className="basic-multi-select min-w-48"
+                  classNamePrefix="select"
+                />
+              </div>
+              <div className="inline-flex items-center">
+                <label htmlFor="perPage" className="mr-3">Entries:</label>
+                <select
+                  id="perPage"
+                  value={perPage}
+                  onChange={(e) => setPerPage(parseInt(e.target.value))}
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                 >
-                  {breeds.map((breed) => (
-                    <option key={breed} value={breed}>{breed}</option>
-                  ))}
+                  <option value="12">12</option>
+                  <option value="25">25</option>
+                  <option value="50">50</option>
                 </select>
               </div>
               <div className="inline-flex items-center">
